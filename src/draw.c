@@ -576,6 +576,12 @@ static cairo_surface_t *render_background(cairo_surface_t *srf,
 
         cairo_set_operator(c, CAIRO_OPERATOR_SOURCE);
 
+        if (cl->n && cl->n->progress >= 0 && cl->n->progress <= 100) {
+                cairo_set_source_rgb(c, cl->bg.r + 0.1, cl->bg.g + 0.1, cl->bg.b + 0.1);
+                cairo_rectangle(c, x, y + height - height/8 - 1 , width * cl->n->progress / 100, height/8);
+                cairo_fill(c);
+        }
+
         if (   settings.sep_color.type != SEP_FRAME
             && settings.separator_height > 0
             && !last) {
