@@ -275,6 +275,9 @@ void queues_check_timeouts(bool idle)
                  */
                 iter = iter->next;
 
+                if (n->resident)
+                        continue;
+
                 /* don't timeout when user is idle */
                 if (idle && !n->transient) {
                         n->start = g_get_monotonic_time();

@@ -140,6 +140,7 @@ static void on_notify(GDBusConnection *connection,
         gint urgency = 1;
         gint progress = -1;
         gboolean transient = 0;
+        gboolean resident = 0;
         gchar *fgcolor = NULL;
         gchar *bgcolor = NULL;
         gchar *category = NULL;
@@ -214,9 +215,9 @@ static void on_notify(GDBusConnection *connection,
                                                 g_variant_unref(dict_value);
                                         }
 
-                                        /* Check for transient hints
+                                        /* Check for transient/resident hints
                                          *
-                                         * According to the spec, the transient hint should be boolean.
+                                         * According to the spec, the transient/resident hint should be boolean.
                                          * But notify-send does not support hints of type 'boolean'.
                                          * So let's check for int and boolean until notify-send is fixed.
                                          */
@@ -228,6 +229,17 @@ static void on_notify(GDBusConnection *connection,
                                                 g_variant_unref(dict_value);
                                         } else if((dict_value = g_variant_lookup_value(content, "transient", G_VARIANT_TYPE_INT32))) {
                                                 transient = g_variant_get_int32(dict_value) > 0;
+                                                g_variant_unref(dict_value);
+                                        }
+
+                                        if((dict_value = g_variant_lookup_value(content, "resident", G_VARIANT_TYPE_BOOLEAN))) {
+                                                resident = g_variant_get_boolean(dict_value);
+                                                g_variant_unref(dict_value);
+                                        } else if((dict_value = g_variant_lookup_value(content, "resident", G_VARIANT_TYPE_UINT32))) {
+                                                resident = g_variant_get_uint32(dict_value) > 0;
+                                                g_variant_unref(dict_value);
+                                        } else if((dict_value = g_variant_lookup_value(content, "resident", G_VARIANT_TYPE_INT32))) {
+                                                resident = g_variant_get_int32(dict_value) > 0;
                                                 g_variant_unref(dict_value);
                                         }
 
@@ -267,6 +279,7 @@ static void on_notify(GDBusConnection *connection,
         n->category = category;
         n->dbus_client = g_strdup(sender);
         n->transient = transient;
+        n->resident = resident && !transient; // ignore resident if transient is set
 
         if (actions->count < 1) {
                 actions_free(actions);

@@ -40,6 +40,7 @@ void notification_print(notification *n)
         printf("\ttimeout: %ld\n", n->timeout/1000);
         printf("\turgency: %d\n", n->urgency);
         printf("\ttransient: %d\n", n->transient);
+        printf("\tresident: %d\n", n->resident);
         printf("\tformatted: '%s'\n", n->msg);
         printf("\tfg: %s\n", n->color_strings[ColFG]);
         printf("\tbg: %s\n", n->color_strings[ColBG]);

@@ -52,6 +52,7 @@ typedef struct _notification {
         const char *color_strings[3];
         bool first_render;
         bool transient;
+        bool resident;
 
         int progress;           /* percentage (-1: undefined) */
         int history_ignore;
