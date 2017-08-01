@@ -264,9 +264,12 @@ void queues_check_timeouts(bool idle)
         if (displayed->length == 0)
                 return;
 
+
         GList *iter = g_queue_peek_head_link(displayed);
         while (iter) {
                 notification *n = iter->data;
+
+                printf("DEBUG: Notification is: n->sum: %s, timeouthit: %d, resident: %d\n", n->summary, difftime(time(NULL), n->start) > n->timeout, n->resident);
 
                 /*
                  * Update iter to the next item before we either exit the
