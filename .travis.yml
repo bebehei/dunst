@@ -24,10 +24,11 @@ git:
 before_install:
   - pip install --user cpp-coveralls
 
-script:
   - CFLAGS="-Werror" make all dunstify test-valgrind doc-doxygen
   - CFLAGS="-Werror" make clean
   - CFLAGS="-Werror" make test-coverage
+  - find -type f -name '*.[ch]' -not -name greatest.h | xargs clang-format -i
+  - [ "$(git status --porcellain | wc -l)" < 1 ] || {git status; git diff; exit 1;}
 
 matrix:
   include:
