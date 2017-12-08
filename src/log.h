@@ -12,7 +12,12 @@
 #define LOG_W g_warning
 #define LOG_M g_message
 #define LOG_I g_info
-#define LOG_D g_debug
+
+#ifdef DEBUG_BUILD
+#define LOG_D(...) g_debug(__VA_ARGS__)
+#else
+#define LOG_D(...)
+#endif
 
 #define die(...) {LOG_C(__VA_ARGS__); exit(EXIT_FAILURE);}
 
