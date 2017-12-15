@@ -106,6 +106,12 @@ void load_settings(char *cmdline_config_path)
               "Using STATIC_CONFIG is deprecated behavior.");
 #endif
 
+        log_set_level_from_string(option_get_string(
+                "global",
+                "verbosity", "-verbosity", NULL,
+                "The desired verbosity to merge on master"
+        ));
+
         settings.per_monitor_dpi = option_get_bool(
                 "experimental",
                 "per_monitor_dpi", NULL, false,
