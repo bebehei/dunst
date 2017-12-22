@@ -63,5 +63,7 @@ gboolean x_mainloop_fd_dispatch(GSource *source, GSourceFunc callback,
 gboolean x_mainloop_fd_check(GSource *source);
 gboolean x_mainloop_fd_prepare(GSource *source, gint *timeout);
 
+const char *xevent_type_to_string(int type);
+
 #endif
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */
