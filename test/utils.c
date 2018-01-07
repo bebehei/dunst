@@ -72,26 +72,33 @@ SUITE_BEGIN(string_to_path)
 SUITE_END(string_to_path)
 #undef THIS_SUITE_NAME
 
-typedef struct struct_string_to_time { const char *desc; const char *bug; const char *i; gint64 exp; } data_string_to_time;
+typedef struct struct_string_to_time { ExpectedLogMessage msg; const char *desc; const char *bug; const char *i; gint64 exp; } data_string_to_time;
 
 void helper_string_to_time(gconstpointer data)
 {
         data_string_to_time *d = (data_string_to_time*) data;
         g_test_bug(d->bug);
+        if (d->msg.message_regex) g_test_expect_message(d->msg.domain, d->msg.level, d->msg.message_regex);
         gint64 out = string_to_time(d->i);
+        if (d->msg.message_regex) g_test_assert_expected_messages();
         g_assert_cmpint(out, ==, 1000 * d->exp);
 }
 
 #define THIS_SUITE_NAME "string_to_time"
 SUITE_BEGIN(string_to_time)
+
+        ExpectedLogMessage nomsg = {.message_regex = NULL};
+        ExpectedLogMessage digit = {.message_regex = "*No digits found*", .domain = NULL, .level = G_LOG_LEVEL_WARNING};
+
         data_string_to_time datasets[] = {
-                        { .i = "5000 ms",      .exp = 5000,      .bug = "", .desc = PREFIX"/space between args"    },
-                        { .i = "  5    ms   ", .exp = 5,         .bug = "", .desc = PREFIX"/arbitary spaces around"},
-                        { .i = "5000ms",       .exp = 5000,      .bug = "", .desc = PREFIX"/no space between args" },
-                        { .i = "10",           .exp = 10000,     .bug = "", .desc = PREFIX"/default unit seconds"  },
-                        { .i = "2m",           .exp = 120000,    .bug = "", .desc = PREFIX"/timeunit minutes"      },
-                        { .i = "11h",          .exp = 39600000,  .bug = "", .desc = PREFIX"/timeunit hours"        },
-                        { .i = "9d",           .exp = 777600000, .bug = "", .desc = PREFIX"/timeunit days"         },
+                        { .i = "5000 ms",      .exp = 5000,      .msg = nomsg, .bug = "", .desc = PREFIX"/space between args"    },
+                        { .i = "  5    ms   ", .exp = 5,         .msg = nomsg, .bug = "", .desc = PREFIX"/arbitary spaces around"},
+                        { .i = "     ms   ",   .exp = 0,         .msg = digit, .bug = "", .desc = PREFIX"/no digits found"       },
+                        { .i = "5000ms",       .exp = 5000,      .msg = nomsg, .bug = "", .desc = PREFIX"/no space between args" },
+                        { .i = "10",           .exp = 10000,     .msg = nomsg, .bug = "", .desc = PREFIX"/default unit seconds"  },
+                        { .i = "2m",           .exp = 120000,    .msg = nomsg, .bug = "", .desc = PREFIX"/timeunit minutes"      },
+                        { .i = "11h",          .exp = 39600000,  .msg = nomsg, .bug = "", .desc = PREFIX"/timeunit hours"        },
+                        { .i = "9d",           .exp = 777600000, .msg = nomsg, .bug = "", .desc = PREFIX"/timeunit days"         },
         };
 SUITE_END(string_to_time)
 #undef THIS_SUITE_NAME

@@ -1,5 +1,13 @@
 
+#include <glib.h>
+
 #define PREFIX "/"SUITE_NAME"/"THIS_SUITE_NAME
+
+typedef struct ExpectedLogMessage_t {
+        const char *domain;
+        const GLogLevelFlags level;
+        const char *message_regex;
+} ExpectedLogMessage;
 
 #define SUITE_BEGIN(name) \
 GTestSuite *suite_##name(void) \
