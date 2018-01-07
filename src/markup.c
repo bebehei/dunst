@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "settings.h"
+#include "log.h"
 #include "utils.h"
 
 static char *markup_quote(char *str)
