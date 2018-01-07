@@ -94,6 +94,7 @@ SUITE_BEGIN(string_to_time)
                         { .i = "5000 ms",      .exp = 5000,      .msg = nomsg, .bug = "", .desc = PREFIX"/space between args"    },
                         { .i = "  5    ms   ", .exp = 5,         .msg = nomsg, .bug = "", .desc = PREFIX"/arbitary spaces around"},
                         { .i = "     ms   ",   .exp = 0,         .msg = digit, .bug = "", .desc = PREFIX"/no digits found"       },
+                        { .i = "  d9",         .exp = 0,         .msg = digit, .bug = "", .desc = PREFIX"/flipped char and unit" },
                         { .i = "5000ms",       .exp = 5000,      .msg = nomsg, .bug = "", .desc = PREFIX"/no space between args" },
                         { .i = "10",           .exp = 10000,     .msg = nomsg, .bug = "", .desc = PREFIX"/default unit seconds"  },
                         { .i = "2m",           .exp = 120000,    .msg = nomsg, .bug = "", .desc = PREFIX"/timeunit minutes"      },
