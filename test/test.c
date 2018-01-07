@@ -1,10 +1,13 @@
 #include <glib.h>
 
 #include "test.h"
+#include <stdbool.h>
+#include "src/log.h"
 
 SUITE_EXTERN(utils);
 
 int main(int argc, char *argv[]) {
+        dunst_log_init(false);
         g_test_init(&argc, &argv, NULL);
 
         //TODO: does this work?!
