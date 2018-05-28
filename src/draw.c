@@ -577,8 +577,17 @@ static cairo_surface_t *render_background(cairo_surface_t *srf,
         cairo_set_operator(c, CAIRO_OPERATOR_SOURCE);
 
         if (cl->n && cl->n->progress >= 0 && cl->n->progress <= 100) {
+
+                int padding = last ? corner_radius : 0;
+
+                // fill the 100% progress
                 cairo_set_source_rgb(c, cl->bg.r + 0.1, cl->bg.g + 0.1, cl->bg.b + 0.1);
-                cairo_rectangle(c, x, y + height - height/8 - 1 , width * cl->n->progress / 100, height/8);
+                cairo_rectangle(c, x+padding, y + height - height/8, (width-2*padding), height/8);
+                cairo_fill(c);
+
+                // fill the current progress
+                cairo_set_source_rgb(c, cl->bg.r + 0.2, cl->bg.g + 0.2, cl->bg.b + 0.2);
+                cairo_rectangle(c, x+padding, y + height - height/8, (width-2*padding) * cl->n->progress / 100, height/8);
                 cairo_fill(c);
         }
 
