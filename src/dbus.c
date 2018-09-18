@@ -413,11 +413,9 @@ static void on_get_server_information(GDBusConnection *connection,
                                       const GVariant *parameters,
                                       GDBusMethodInvocation *invocation)
 {
-        GVariant *value;
+        GVariant *answer = g_variant_new("(ssss)", "dunst", "knopwob", VERSION, "1.2");
 
-        value = g_variant_new("(ssss)", "dunst", "knopwob", VERSION, "1.2");
-        g_dbus_method_invocation_return_value(invocation, value);
-
+        g_dbus_method_invocation_return_value(invocation, answer);
         g_dbus_connection_flush(connection, NULL, NULL, NULL);
 }
 
