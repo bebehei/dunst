@@ -466,6 +466,40 @@ void signal_action_invoked(const struct notification *n, const char *identifier)
         }
 }
 
+void dbus_signal_status_changed(struct dunst_status status)
+{
+        // We might have not a working connection yet, so just ignore it.
+        if (!dbus_conn)
+                return;
+
+        //TODO: I'm pretty sure this is the right format string, but I don't know how to verify it
+        GVariantBuilder builder;
+        g_variant_builder_init(&builder, G_VARIANT_TYPE("(sa{sv}as)"));
+        g_variant_builder_add(&builder, "s", DUNST_IFAC);
+
+        g_variant_builder_open(&builder, G_VARIANT_TYPE ("a{sv}"));
+        g_variant_builder_add(&builder, "{sv}", "running", g_variant_new_boolean(status.running));
+        g_variant_builder_close(&builder);
+
+        g_variant_builder_open(&builder, G_VARIANT_TYPE ("as"));
+        g_variant_builder_add(&builder, "s", "unrelated");
+        g_variant_builder_close(&builder);
+
+        GError *err = NULL;
+        g_dbus_connection_emit_signal(dbus_conn,
+                                      NULL,
+                                      DUNST_PATH,
+                                      "org.freedesktop.DBus.Properties",
+                                      "PropertiesChanged",
+                                      g_variant_builder_end(&builder),
+                                      &err);
+
+        if (err) {
+                LOG_W("Unable send signal 'PropertiesChanged': %s", err->message);
+                g_error_free(err);
+        }
+}
+
 static const GDBusInterfaceVTable interface_vtable = {
         handle_method_call
 };
