@@ -42,8 +42,6 @@ extern const char *colors[3][3];
 
 void wake_up(void);
 
-int dunst_main(int argc, char *argv[]);
-
 void usage(int exit_status);
 void print_version(void);
 

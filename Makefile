@@ -63,11 +63,11 @@ debug: all
 
 ${OBJ}: config.mk
 
-dunst: ${OBJ} main.o
-	${CC} -o ${@} ${OBJ} main.o ${CFLAGS} ${LDFLAGS}
+dunst: ${OBJ}
+	${CC} -o ${@} $^ ${CFLAGS} ${LDFLAGS}
 
 dunstify: dunstify.o
-	${CC} -o ${@} dunstify.o ${CFLAGS} ${LDFLAGS}
+	${CC} -o ${@} $^ ${CFLAGS} ${LDFLAGS}
 
 .PHONY: test test-valgrind test-coverage
 test: test/test clean-coverage-run
@@ -122,7 +122,7 @@ endif
 clean: clean-dunst clean-dunstify clean-doc clean-tests clean-coverage clean-coverage-run
 
 clean-dunst:
-	rm -f dunst ${OBJ} main.o
+	rm -f dunst ${OBJ} dunst.o
 	rm -f org.knopwob.dunst.service
 	rm -f dunst.systemd.service
 

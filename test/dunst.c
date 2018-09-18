@@ -1,3 +1,4 @@
+#define main dunst_main
 #include "../src/dunst.c"
 #include "greatest.h"
 
