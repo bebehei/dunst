@@ -112,7 +112,17 @@ static void on_get_server_information(GDBusConnection *connection,
                                       const gchar *sender,
                                       const GVariant *parameters,
                                       GDBusMethodInvocation *invocation);
+static void on_property_get(GDBusConnection *connection,
+                            const gchar *sender,
+                            GVariant *parameters,
+                            GDBusMethodInvocation *invocation);
+static void on_property_set(GDBusConnection *connection,
+                            const gchar *sender,
+                            GVariant *parameters,
+                            GDBusMethodInvocation *invocation);
+
 static struct raw_image *get_raw_image_from_data_hint(GVariant *icon_data);
+
 
 enum dbus_method dbus_select_method(const gchar *interface_name, const gchar *method_name)
 {
@@ -169,6 +179,14 @@ void handle_method_call(GDBusConnection *connection,
 
         case DBUS_METHOD_FDO_SERVINFO:
                 on_get_server_information(connection, sender, parameters, invocation);
+                break;
+
+        case DBUS_PROPERTY_GET:
+                on_property_get(connection, sender, parameters, invocation);
+                break;
+
+        case DBUS_PROPERTY_SET:
+                on_property_set(connection, sender, parameters, invocation);
                 break;
 
         default:
@@ -400,6 +418,37 @@ static void on_get_server_information(GDBusConnection *connection,
         value = g_variant_new("(ssss)", "dunst", "knopwob", VERSION, "1.2");
         g_dbus_method_invocation_return_value(invocation, value);
 
+        g_dbus_connection_flush(connection, NULL, NULL, NULL);
+}
+
+static void on_property_get(GDBusConnection *connection,
+                            const gchar *sender,
+                            GVariant *parameters,
+                            GDBusMethodInvocation *invocation)
+{
+        GVariant *reply = g_variant_new("(v)", g_variant_new_boolean(dunst_status_get().running));
+
+        g_dbus_method_invocation_return_value(invocation, reply);
+        g_dbus_connection_flush(connection, NULL, NULL, NULL);
+}
+
+static void on_property_set(GDBusConnection *connection,
+                            const gchar *sender,
+                            GVariant *parameters,
+                            GDBusMethodInvocation *invocation)
+{
+        char *ifac;
+        char *property;
+        GVariant *data;
+        bool running;
+        g_variant_get(parameters, "(ssv)", &ifac, &property, &data);
+
+        g_variant_get(data, "b", &running);
+        dunst_status(S_RUNNING, running);
+
+        wake_up();
+
+        g_dbus_method_invocation_return_value(invocation, NULL);
         g_dbus_connection_flush(connection, NULL, NULL, NULL);
 }
 
