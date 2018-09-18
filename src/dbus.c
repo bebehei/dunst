@@ -21,6 +21,19 @@
 #define DUNST_IFAC "org.dunstproject.cmd0"
 #define DUNST_NAME "org.freedesktop.Notifications"
 
+enum dbus_method {
+        DBUS_METHOD_INVALID = 0,
+        DBUS_METHOD_MIN = 1,
+        DBUS_METHOD_FDO_CAPS = 1,
+        DBUS_METHOD_FDO_NOTIFY = 2,
+        DBUS_METHOD_FDO_CLOSE = 3,
+        DBUS_METHOD_FDO_SERVINFO = 4,
+        DBUS_PROPERTY_SET = 5,
+        DBUS_PROPERTY_GET = 6,
+        DBUS_PROPERTY_GETALL = 7,
+        DBUS_METHOD_MAX = 8,
+};
+
 GDBusConnection *dbus_conn;
 
 static GDBusNodeInfo *introspection_data = NULL;
@@ -101,6 +114,37 @@ static void on_get_server_information(GDBusConnection *connection,
                                       GDBusMethodInvocation *invocation);
 static struct raw_image *get_raw_image_from_data_hint(GVariant *icon_data);
 
+enum dbus_method dbus_select_method(const gchar *interface_name, const gchar *method_name)
+{
+        if (STR_EQ(interface_name, "org.freedesktop.DBus.Properties")) {
+                if (STR_EQ(method_name, "Set")) {
+                        return DBUS_PROPERTY_SET;
+                } else if (STR_EQ(method_name, "Get")) {
+                        return DBUS_PROPERTY_GET;
+                } else if (STR_EQ(method_name, "GetAll")) {
+                        return DBUS_PROPERTY_GETALL;
+                } else {
+                        return DBUS_METHOD_INVALID;
+                }
+        } else if (STR_EQ(interface_name, DUNST_IFAC)) {
+                return DBUS_METHOD_INVALID;
+        } else if (STR_EQ(interface_name, FDN_IFAC)) {
+                if (STR_EQ(method_name, "GetCapabilities")) {
+                        return DBUS_METHOD_FDO_CAPS;
+                } else if (STR_EQ(method_name, "Notify")) {
+                        return DBUS_METHOD_FDO_NOTIFY;
+                } else if (STR_EQ(method_name, "CloseNotification")) {
+                        return DBUS_METHOD_FDO_CLOSE;
+                } else if (STR_EQ(method_name, "GetServerInformation")) {
+                        return DBUS_METHOD_FDO_SERVINFO;
+                } else {
+                        return DBUS_METHOD_INVALID;
+                }
+        } else {
+                return DBUS_METHOD_INVALID;
+        }
+}
+
 void handle_method_call(GDBusConnection *connection,
                         const gchar *sender,
                         const gchar *object_path,
@@ -110,18 +154,29 @@ void handle_method_call(GDBusConnection *connection,
                         GDBusMethodInvocation *invocation,
                         gpointer user_data)
 {
-        if (STR_EQ(method_name, "GetCapabilities")) {
+        switch (dbus_select_method(interface_name, method_name)) {
+        case DBUS_METHOD_FDO_CAPS:
                 on_get_capabilities(connection, sender, parameters, invocation);
-        } else if (STR_EQ(method_name, "Notify")) {
+                break;
+
+        case DBUS_METHOD_FDO_NOTIFY:
                 on_notify(connection, sender, parameters, invocation);
-        } else if (STR_EQ(method_name, "CloseNotification")) {
+                break;
+
+        case DBUS_METHOD_FDO_CLOSE:
                 on_close_notification(connection, sender, parameters, invocation);
-        } else if (STR_EQ(method_name, "GetServerInformation")) {
+                break;
+
+        case DBUS_METHOD_FDO_SERVINFO:
                 on_get_server_information(connection, sender, parameters, invocation);
-        } else {
-                LOG_M("Unknown method name: '%s' (sender: '%s').",
+                break;
+
+        default:
+                LOG_M("Unknown method '%s' on interface '%s' (sender: '%s') received.",
                       method_name,
+                      interface_name,
                       sender);
+                break;
         }
 }
 
