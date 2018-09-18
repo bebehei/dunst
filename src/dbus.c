@@ -17,6 +17,10 @@
 #define FDN_IFAC "org.freedesktop.Notifications"
 #define FDN_NAME "org.freedesktop.Notifications"
 
+#define DUNST_PATH "/org/freedesktop/Notifications"
+#define DUNST_IFAC "org.dunstproject.cmd0"
+#define DUNST_NAME "org.freedesktop.Notifications"
+
 GDBusConnection *dbus_conn;
 
 static GDBusNodeInfo *introspection_data = NULL;
@@ -62,6 +66,13 @@ static const char *introspection_xml =
     "            <arg name=\"id\"         type=\"u\"/>"
     "            <arg name=\"action_key\" type=\"s\"/>"
     "        </signal>"
+    "   </interface>"
+    "    <interface name=\""DUNST_IFAC"\">"
+
+    "        <property name=\"running\" type=\"b\" access=\"readwrite\">"
+    "            <annotation name=\"org.freedesktop.DBus.Property.EmitsChangedSignal\" value=\"true\"/>"
+    "        </property>"
+
     "   </interface>"
     "</node>";
 
@@ -412,16 +423,20 @@ static void on_bus_acquired(GDBusConnection *connection,
 
         GError *err = NULL;
 
-        registration_id = g_dbus_connection_register_object(connection,
-                                                            FDN_PATH,
-                                                            introspection_data->interfaces[0],
-                                                            &interface_vtable,
-                                                            NULL,
-                                                            NULL,
-                                                            &err);
+        for (GDBusInterfaceInfo **ifaces = introspection_data->interfaces;
+                                 *ifaces;
+                                  ifaces++) {
+                registration_id = g_dbus_connection_register_object(connection,
+                                                                    FDN_PATH,
+                                                                    *ifaces,
+                                                                    &interface_vtable,
+                                                                    NULL,
+                                                                    NULL,
+                                                                    &err);
 
-        if (registration_id == 0) {
-                DIE("Unable to register dbus connection: %s", err->message);
+                if (registration_id == 0) {
+                        DIE("Unable to register dbus connection interface '%s': %s", (*ifaces)->name, err->message);
+                }
         }
 }
 
