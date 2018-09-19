@@ -47,11 +47,13 @@ LDFLAGS := ${DEFAULT_LDFLAGS} ${LDFLAGS} ${LIBS}
 
 SRC := $(sort $(shell find src/ -name '*.c'))
 OBJ := ${SRC:.c=.o}
+SRC_CMD := $(sort $(shell find cmd/ -name '*.c'))
+OBJ_CMD := ${SRC_CMD:.c=.o}
 TEST_SRC := $(sort $(shell find test/ -name '*.c'))
 TEST_OBJ := $(TEST_SRC:.c=.o)
 
 .PHONY: all debug
-all: doc dunst service
+all: doc dunst dunstcmd service
 
 debug: CFLAGS   += ${CPPFLAGS_DEBUG} ${CFLAGS_DEBUG}
 debug: LDFLAGS  += ${LDFLAGS_DEBUG}
@@ -68,6 +70,9 @@ dunst: ${OBJ}
 
 dunstify: dunstify.o
 	${CC} -o ${@} $^ ${CFLAGS} ${LDFLAGS}
+
+dunstcmd: ${OBJ_CMD}
+	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 .PHONY: test test-valgrind test-coverage
 test: test/test clean-coverage-run
@@ -118,8 +123,8 @@ service-systemd:
 	@sed "s|##PREFIX##|$(PREFIX)|" dunst.systemd.service.in > dunst.systemd.service
 endif
 
-.PHONY: clean clean-dunst clean-dunstify clean-doc clean-tests clean-coverage clean-coverage-run
-clean: clean-dunst clean-dunstify clean-doc clean-tests clean-coverage clean-coverage-run
+.PHONY: clean clean-dunst clean-dunstcmd clean-dunstify clean-doc clean-tests clean-coverage clean-coverage-run
+clean: clean-dunst clean-dunstcmd clean-dunstify clean-doc clean-tests clean-coverage clean-coverage-run
 
 clean-dunst:
 	rm -f dunst ${OBJ} dunst.o
@@ -129,6 +134,10 @@ clean-dunst:
 clean-dunstify:
 	rm -f dunstify.o
 	rm -f dunstify
+
+clean-dunstcmd:
+	rm -f dunstcmd
+	rm -f ${OBJ_CMD}
 
 clean-doc:
 	rm -f docs/dunst.1
@@ -146,15 +155,18 @@ clean-coverage-run:
 	find . -type f -name '*.gcov' -delete
 	find . -type f -name '*.gcda' -delete
 
-.PHONY: install install-dunst install-doc \
+.PHONY: install install-dunst install-dunstcmd install-doc \
         install-service install-service-dbus install-service-systemd \
         uninstall \
         uninstall-service uninstall-service-dbus uninstall-service-systemd
-install: install-dunst install-doc install-service
+install: install-dunst install-dunstcmd install-doc install-service
 
 install-dunst: dunst doc
 	install -Dm755 dunst ${DESTDIR}${PREFIX}/bin/dunst
 	install -Dm644 docs/dunst.1 ${DESTDIR}${MANPREFIX}/man1/dunst.1
+
+instal-dunstcmd: dunstcmd
+	install -Dm755 dunstcmd ${DESTDIR}${PREFIX}/bin/dunstcmd
 
 install-doc:
 	install -Dm644 dunstrc ${DESTDIR}${PREFIX}/share/dunst/dunstrc
@@ -170,6 +182,7 @@ endif
 
 uninstall: uninstall-service
 	rm -f ${DESTDIR}${PREFIX}/bin/dunst
+	rm -f ${DESTDIR}${PREFIX}/bin/dunstcmd
 	rm -f ${DESTDIR}${MANPREFIX}/man1/dunst.1
 	rm -rf ${DESTDIR}${PREFIX}/share/dunst
 

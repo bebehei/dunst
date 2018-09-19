@@ -10,6 +10,7 @@ vgcore.*
 /docs/internal/coverage
 /docs/internal/html
 /dunst
+/dunstcmd
 /dunstify
 /dunst.systemd.service
 /org.knopwob.dunst.service
