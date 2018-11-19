@@ -1,6 +1,8 @@
 # dunst - Notification-daemon
 # See LICENSE file for copyright and license details.
 
+VERBOSE_CC=@
+
 include config.mk
 
 VERSION := "1.3.2-non-git"
@@ -67,15 +69,18 @@ debug: CPPFLAGS += ${CPPFLAGS_DEBUG}
 debug: all
 
 %.o: %.c
-	${CC} -o $@ -c $< ${CFLAGS}
+	@echo COMP ${@}
+	${VERBOSE_CC}${CC} -o $@ -c $< ${CFLAGS}
 
 ${OBJ}: config.mk
 
 dunst: ${OBJ} main.o
-	${CC} -o ${@} ${OBJ} main.o ${CFLAGS} ${LDFLAGS}
+	@echo LINK ${@}
+	${VERBOSE_CC}${CC} -o ${@} ${OBJ} main.o ${CFLAGS} ${LDFLAGS}
 
 dunstify: dunstify.o
-	${CC} -o ${@} dunstify.o ${CFLAGS} ${LDFLAGS}
+	@echo LINK ${@}
+	${VERBOSE_CC}${CC} -o ${@} dunstify.o ${CFLAGS} ${LDFLAGS}
 
 .PHONY: test test-valgrind test-coverage
 test: test/test clean-coverage-run
@@ -107,7 +112,8 @@ test/%.o: test/%.c src/%.c
 	${CC} -o $@ -c $< ${CFLAGS}
 
 test/test: ${OBJ} ${TEST_OBJ}
-	${CC} -o ${@} ${TEST_OBJ} $(filter-out ${TEST_OBJ:test/%=src/%},${OBJ}) ${CFLAGS} ${LDFLAGS}
+	@echo LINK ${@}
+	${VERBOSE_CC}${CC} -o ${@} ${TEST_OBJ} $(filter-out ${TEST_OBJ:test/%=src/%},${OBJ}) ${CFLAGS} ${LDFLAGS}
 
 .PHONY: doc doc-doxygen
 doc: docs/dunst.1
