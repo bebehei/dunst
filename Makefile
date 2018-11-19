@@ -50,6 +50,14 @@ OBJ := ${SRC:.c=.o}
 TEST_SRC := $(sort $(shell find test/ -name '*.c'))
 TEST_OBJ := $(TEST_SRC:.c=.o)
 
+.PHONY: .depend
+.depend:
+	rm -f $@
+	$(CC) -MM -MT src/foo.o  ${SRC} >> $@;
+	$(CC) -MM -MT test/foo.o ${TEST_SRC} >> $@;
+
+include .depend
+
 .PHONY: all debug
 all: doc dunst service
 
