@@ -1,0 +1,4 @@
+
+- GetAll is not implemented
+- Multiple properties necessary?
+- memleaktests in src/dbus.c
