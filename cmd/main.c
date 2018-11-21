@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "cmd_help.h"
 #include "utils.h"
 
 static gboolean settings_version = false;
@@ -19,13 +20,16 @@ enum subcmd parse_subcommand(const char *cmd)
 {
         if (STR_EQ(cmd, ""))
                 return DUNSTCMD_MAIN;
+        if (STR_EQ(cmd, "help"))
+                return DUNSTCMD_SUBCMD_HELP;
 
         return DUNSTCMD_SUBCMD_INVALID;
 }
 
 const char *cmdlist =
         "Available subcommands:\n"
-        "None available yet.\n"
+        "\n"
+        " - help:   Print help for other subcommands\n"
         "";
 
 int main(int argc, char *argv[])
@@ -54,7 +58,12 @@ int main(int argc, char *argv[])
         }
 
         char *command = argv[1];
+        char **v = argv+1;
+        int c = argc-1;
         switch (parse_subcommand(command)) {
+        case DUNSTCMD_SUBCMD_HELP:
+                main_subcmd_help(c, v);
+                break;
         case DUNSTCMD_MAIN:
         case DUNSTCMD_SUBCMD_INVALID:
                 DIE("Invalid subcommand: '%s'", command);
