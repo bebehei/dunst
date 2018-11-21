@@ -3,6 +3,7 @@
 #ifndef CMD_UTILS_H
 #define CMD_UTILS_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,6 +20,11 @@
 //TODO: remove (or take from dunstmain?)
 //! Test if string a and b contain the same chars
 #define STR_EQ(a, b) (strcmp(a, b) == 0)
+
+/* Parse a boolean of a string.
+ * The return value determines the success, while the ret param holds the actual parsed value
+ */
+bool parse_bool(const char *boolstr, bool *ret);
 
 #endif
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */

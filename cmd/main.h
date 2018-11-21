@@ -5,6 +5,7 @@
 
 enum subcmd {
         DUNSTCMD_MAIN,
+        DUNSTCMD_SUBCMD_STATUS,
         DUNSTCMD_SUBCMD_HELP,
         DUNSTCMD_SUBCMD_INVALID,
 };

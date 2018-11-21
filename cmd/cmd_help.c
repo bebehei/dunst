@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "cmd_status.h"
 #include "main.h"
 #include "utils.h"
 
@@ -35,6 +36,9 @@ void main_subcmd_help(int argc, char *argv[])
                 break;
         case DUNSTCMD_SUBCMD_HELP:
                 main_subcmd_help(c, v);
+                break;
+        case DUNSTCMD_SUBCMD_STATUS:
+                main_subcmd_status(c, v);
                 break;
         case DUNSTCMD_SUBCMD_INVALID:
                 DIE("Cannot print help for '%s': Subcommand not available.", command);

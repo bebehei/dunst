@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "cmd_help.h"
+#include "cmd_status.h"
 #include "utils.h"
 
 static gboolean settings_version = false;
@@ -22,6 +23,8 @@ enum subcmd parse_subcommand(const char *cmd)
                 return DUNSTCMD_MAIN;
         if (STR_EQ(cmd, "help"))
                 return DUNSTCMD_SUBCMD_HELP;
+        if (STR_EQ(cmd, "status"))
+                return DUNSTCMD_SUBCMD_STATUS;
 
         return DUNSTCMD_SUBCMD_INVALID;
 }
@@ -30,6 +33,7 @@ const char *cmdlist =
         "Available subcommands:\n"
         "\n"
         " - help:   Print help for other subcommands\n"
+        " - status: Get status information about running dunst instance\n"
         "";
 
 int main(int argc, char *argv[])
@@ -63,6 +67,9 @@ int main(int argc, char *argv[])
         switch (parse_subcommand(command)) {
         case DUNSTCMD_SUBCMD_HELP:
                 main_subcmd_help(c, v);
+                break;
+        case DUNSTCMD_SUBCMD_STATUS:
+                main_subcmd_status(c, v);
                 break;
         case DUNSTCMD_MAIN:
         case DUNSTCMD_SUBCMD_INVALID:
