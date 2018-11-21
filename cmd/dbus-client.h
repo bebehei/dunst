@@ -24,5 +24,13 @@
  */
 GVariant* dbus_client_get_property(const char *property, GError **error);
 
+/** Set a property in the current dunst instance
+ *
+ * @param property The porperty string of the given dunst property
+ * @param value The value in the corresponding GVariant format for the property
+ * @param error (nullable) The error message, if wanted
+ */
+void dbus_client_set_property(const char *property, GVariant *value, GError **error);
+
 #endif
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */

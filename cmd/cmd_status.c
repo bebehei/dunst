@@ -29,12 +29,6 @@ static void status_print(bool status)
                 printf("paused\n");
 }
 
-
-static bool cmd_status_set(bool value)
-{
-        return false;
-}
-
 void main_subcmd_status(int argc, char *argv[])
 {
         GError *err = NULL;
@@ -49,10 +43,16 @@ void main_subcmd_status(int argc, char *argv[])
 
         if (settings_set) {
                 bool status;
-                if (parse_bool(settings_set, &status))
-                        cmd_status_set(status);
-                else
+                if (!parse_bool(settings_set, &status))
                         DIE("Invalid boolean value: %s", settings_set);
+
+                GVariant *var = g_variant_new("b", status);
+                GError *error = NULL;
+
+                dbus_client_set_property("running", var, &error);
+
+                if (error)
+                        DIE("Cannot set status: %s", err->message);
         } else {
                 GVariant *running = dbus_client_get_property("running", &err);
                 if (err)

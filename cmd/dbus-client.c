@@ -77,4 +77,21 @@ GVariant* dbus_client_get_property(const char *property, GError **error)
         return ret;
 }
 
+void dbus_client_set_property(const char *property, GVariant *value, GError **error)
+{
+        dbus_client_assert_proxy();
+
+        GVariant *info = g_dbus_proxy_call_sync(
+                                     property_proxy,
+                                     PROP_IFAC ".Set",
+                                     g_variant_new("(ssv)", DUNST_IFAC, property, value),
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     NULL,
+                                     error);
+
+        if (info)
+                g_variant_unref(info);
+}
+
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */
