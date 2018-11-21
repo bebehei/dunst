@@ -3,10 +3,12 @@
 #include "cmd_status.h"
 
 #include <assert.h>
+#include <gio/gio.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "dbus-client.h"
 #include "main.h"
 #include "utils.h"
 
@@ -27,10 +29,6 @@ static void status_print(bool status)
                 printf("paused\n");
 }
 
-static bool cmd_status_retrieve(GError **error)
-{
-        return false;
-}
 
 static bool cmd_status_set(bool value)
 {
@@ -56,9 +54,11 @@ void main_subcmd_status(int argc, char *argv[])
                 else
                         DIE("Invalid boolean value: %s", settings_set);
         } else {
-                bool status = cmd_status_retrieve(&err);
+                GVariant *running = dbus_client_get_property("running", &err);
                 if (err)
                         DIE("Cannot retrieve status: %s", err->message);
+                bool status;
+                g_variant_get(running, "b", &status);
                 status_print(status);
         }
 }
