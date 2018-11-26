@@ -1,4 +1,5 @@
 
+- Mainloop so erlaubt, wie es in status --listen verwendet wird?
 - GetAll is not implemented
 - Multiple properties necessary?
 - memleaktests in src/dbus.c

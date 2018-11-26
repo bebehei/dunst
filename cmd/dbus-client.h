@@ -32,5 +32,7 @@ GVariant* dbus_client_get_property(const char *property, GError **error);
  */
 void dbus_client_set_property(const char *property, GVariant *value, GError **error);
 
+void dbus_client_listen(const char *signal, GCallback cb);
+
 #endif
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */

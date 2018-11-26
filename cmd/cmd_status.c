@@ -15,6 +15,8 @@
 static bool settings_listen = false;
 static char *settings_set = NULL;
 
+static GMainLoop *l = NULL;
+
 static GOptionEntry options[] = {
     { "listen", 'l', 0, G_OPTION_ARG_NONE, &settings_listen, "Listen for status changes", NULL },
     { "set", 's', 0, G_OPTION_ARG_STRING, &settings_set, "Listen for status changes", NULL },
@@ -27,6 +29,33 @@ static void status_print(bool status)
                 printf("running\n");
         else
                 printf("paused\n");
+}
+
+static void cb_properties_changed(
+        GDBusProxy *proxy,
+        GVariant   *changed_properties,
+        GStrv       invalidated_properties,
+        gpointer    user_data)
+{
+        GVariant *child;
+        GVariantIter iter;
+
+        g_variant_iter_init(&iter, changed_properties);
+        while ((child = g_variant_iter_next_value (&iter))) {
+
+                char *key;
+                GVariant *val;
+                g_variant_get(child, "{sv}", &key, &val);
+
+                if (STR_EQ(key, "running")) {
+                        bool status_running;
+                        g_variant_get(val, "b", &status_running);
+                        status_print(status_running);
+                }
+
+                g_variant_unref(val);
+                g_variant_unref(child);
+        }
 }
 
 void main_subcmd_status(int argc, char *argv[])
@@ -60,6 +89,12 @@ void main_subcmd_status(int argc, char *argv[])
                 bool status;
                 g_variant_get(running, "b", &status);
                 status_print(status);
+        }
+
+        if (settings_listen) {
+                l = g_main_loop_new(NULL, FALSE);
+                dbus_client_listen("g-properties-changed", G_CALLBACK(cb_properties_changed));
+                g_main_loop_run(l);
         }
 }
 

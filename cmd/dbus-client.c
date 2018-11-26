@@ -94,4 +94,22 @@ void dbus_client_set_property(const char *property, GVariant *value, GError **er
                 g_variant_unref(info);
 }
 
+void dbus_client_listen(const char *signal, GCallback cb)
+{
+        dbus_client_assert_proxy();
+
+        GError *error = NULL;
+        GDBusProxy *p = g_dbus_proxy_new_sync(
+                                     conn,
+                                     G_DBUS_PROXY_FLAGS_NONE,
+                                     NULL, /* info */
+                                     DUNST_NAME,
+                                     DUNST_PATH,
+                                     DUNST_IFAC,
+                                     NULL, /* cancelable */
+                                     &error);
+
+        g_signal_connect(p, signal, cb, NULL);
+}
+
 /* vim: set tabstop=8 shiftwidth=8 expandtab textwidth=0: */
