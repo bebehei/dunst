@@ -13,6 +13,55 @@ static GDBusConnection *conn;
 static GDBusProxy *property_proxy;
 
 /**
+ * Asserts that the current dunst server process is actually controllable.
+ * In case of incompatible dunst version, it Won't return and will die with
+ * an appropriate error message.
+ */
+static void dbus_client_assert_compatible_server(void)
+{
+        static bool dunst_compatible_server = false;
+        if (dunst_compatible_server)
+                return;
+
+        GVariant *output_introspect;
+        GError *error = NULL;
+
+        output_introspect = g_dbus_connection_call_sync(
+                                        conn,
+                                        DUNST_NAME,
+                                        DUNST_PATH,
+                                        "org.freedesktop.DBus.Introspectable",
+                                        "Introspect",
+                                        NULL,
+                                        NULL,
+                                        G_DBUS_CALL_FLAGS_NONE,
+                                        -1,
+                                        NULL,
+                                        &error);
+
+        if (error) {
+                DIE("Interface not available: %s", error->message);
+                g_clear_error(&error);
+        }
+
+        GDBusNodeInfo *node;
+        GDBusInterfaceInfo *ifac;
+        char *introspection_data;
+
+        g_variant_get(output_introspect, "(s)", &introspection_data);
+        node = g_dbus_node_info_new_for_xml(introspection_data, NULL);
+        ifac = g_dbus_node_info_lookup_interface(node, DUNST_IFAC);
+
+        if (ifac)
+                dunst_compatible_server = true;
+        else
+                DIE("There is either no dunst running or the dunst version is not controllable.");
+
+        g_dbus_interface_info_unref(ifac);
+        g_dbus_node_info_unref(node);
+}
+
+/**
  * Assert that a dbus connection is available.
  *
  * If unsuccessful to assert, it won't return.
@@ -26,6 +75,8 @@ static void dbus_client_assert_conn(void)
         conn = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
         if (error)
                 DIE("Cannot establish DBus connection: %s", error->message);
+
+        dbus_client_assert_compatible_server();
 }
 
 /**
