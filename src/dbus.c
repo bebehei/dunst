@@ -580,7 +580,9 @@ static void on_name_acquired(GDBusConnection *connection,
                              const gchar *name,
                              gpointer user_data)
 {
-        dbus_conn = connection;
+        // If we're not able to get org.fd.N bus, we've still got a problem
+        if (STR_EQ(name, FDN_NAME))
+                dbus_conn = connection;
 }
 
 /**
