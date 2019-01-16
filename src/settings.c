@@ -725,6 +725,7 @@ void load_settings(char *cmdline_config_path)
                 r->history_ignore = ini_get_bool(cur_section, "history_ignore", r->history_ignore);
                 r->match_transient = ini_get_bool(cur_section, "match_transient", r->match_transient);
                 r->set_transient = ini_get_bool(cur_section, "set_transient", r->set_transient);
+                r->skip_display = ini_get_bool(cur_section, "skip_display", r->skip_display);
                 {
                         char *c = ini_get_string(
                                 cur_section,

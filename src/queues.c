@@ -33,6 +33,7 @@ static GQueue *history   = NULL; /**< history of displayed notifications */
 
 int next_notification_id = 1;
 
+static void queues_initial_insert(struct notification *n);
 static bool queues_stack_duplicate(struct notification *n);
 static bool queues_stack_by_tag(struct notification *n);
 
@@ -181,7 +182,7 @@ int queues_notification_insert(struct notification *n)
         if (n->id != 0) {
                 if (!queues_notification_replace_id(n)) {
                         // Requested id was not valid, but play nice and assign it anyway
-                        g_queue_insert_sorted(waiting, n, notification_cmp_data, NULL);
+                        queues_initial_insert(n);
                 }
                 inserted = true;
         } else {
@@ -195,12 +196,22 @@ int queues_notification_insert(struct notification *n)
                 inserted = true;
 
         if (!inserted)
-                g_queue_insert_sorted(waiting, n, notification_cmp_data, NULL);
+                queues_initial_insert(n);
 
         if (settings.print_notifications)
                 notification_print(n);
 
         return n->id;
+}
+
+static void queues_initial_insert(struct notification *n)
+{
+        if (n->skip_display) {
+                signal_notification_closed(n, REASON_TIME);
+                queues_history_push(n);
+        } else {
+                g_queue_insert_sorted(waiting, n, notification_cmp_data, NULL);
+        }
 }
 
 /**
