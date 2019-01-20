@@ -207,7 +207,6 @@ int queues_notification_insert(struct notification *n)
 static void queues_initial_insert(struct notification *n)
 {
         if (n->skip_display) {
-                signal_notification_closed(n, REASON_TIME);
                 queues_history_push(n);
         } else {
                 g_queue_insert_sorted(waiting, n, notification_cmp_data, NULL);

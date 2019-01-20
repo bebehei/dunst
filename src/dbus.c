@@ -315,8 +315,11 @@ static void dbus_cb_Notify(
 
         // The message got discarded
         if (id == 0) {
-                signal_notification_closed(n, 2);
+                signal_notification_closed(n, REASON_USER);
                 notification_unref(n);
+        // Display was skipped for the message
+        } else if (n->skip_display) {
+                signal_notification_closed(n, REASON_USER);
         }
 
         wake_up();
