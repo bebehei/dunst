@@ -6,33 +6,20 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gio/gio.h>
 
+#include "dbus.h"
 #include "queues.h"
 
 extern const char *base;
 
 void wake_up_void(void) {  }
 
-struct signal_actioninvoked {
-        guint id;
-        gchar *key;
-        guint subscription_id;
-        GDBusConnection *conn;
-};
-
-struct signal_closed {
-        guint32 id;
-        guint32 reason;
-        guint subscription_id;
-        GDBusConnection *conn;
-};
-
-void dbus_signal_cb_actioninvoked(GDBusConnection *connection,
-                                  const gchar *sender_name,
-                                  const gchar *object_path,
-                                  const gchar *interface_name,
-                                  const gchar *signal_name,
-                                  GVariant *parameters,
-                                  gpointer user_data)
+static void dbus_signal_cb_actioninvoked(GDBusConnection *connection,
+                                         const gchar *sender_name,
+                                         const gchar *object_path,
+                                         const gchar *interface_name,
+                                         const gchar *signal_name,
+                                         GVariant *parameters,
+                                         gpointer user_data)
 {
         g_return_if_fail(user_data);
 
@@ -79,13 +66,13 @@ void dbus_signal_unsubscribe_actioninvoked(struct signal_actioninvoked *actionin
         actioninvoked->subscription_id = -1;
 }
 
-void dbus_signal_cb_closed(GDBusConnection *connection,
-                 const gchar *sender_name,
-                 const gchar *object_path,
-                 const gchar *interface_name,
-                 const gchar *signal_name,
-                 GVariant *parameters,
-                 gpointer user_data)
+static void dbus_signal_cb_closed(GDBusConnection *connection,
+                                  const gchar *sender_name,
+                                  const gchar *object_path,
+                                  const gchar *interface_name,
+                                  const gchar *signal_name,
+                                  GVariant *parameters,
+                                  gpointer user_data)
 {
         g_return_if_fail(user_data);
 
@@ -160,18 +147,7 @@ GVariant *dbus_invoke(const char *method, GVariant *params)
         return retdata;
 }
 
-struct dbus_notification {
-        const char* app_name;
-        guint replaces_id;
-        const char* app_icon;
-        const char* summary;
-        const char* body;
-        GHashTable *actions;
-        GHashTable *hints;
-        int expire_timeout;
-};
-
-void g_free_variant_value(gpointer tofree)
+static void g_free_variant_value(gpointer tofree)
 {
         g_variant_unref((GVariant*) tofree);
 }
