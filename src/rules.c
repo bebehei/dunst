@@ -6,8 +6,31 @@
 #include <glib.h>
 
 #include "dunst.h"
+#include "utils.h"
+#include "../config.h"
 
 GSList *rules = NULL;
+
+void rules_add_rule(struct rule *r)
+{
+        ASSERT_OR_RET(r,);
+        rules = g_slist_insert(rules, r, 0);
+}
+
+static void rule_free_wrapper(gpointer data)
+{
+        struct rule *r = (struct rule*)data;
+
+        // Only free the rule, if it's not contained in the default ruleset (and therefore a pointer to static)
+        if (r < default_rules || r > default_rules + sizeof(default_rules))
+                rule_free(r);
+}
+
+void rules_teardown(void)
+{
+        g_slist_free_full(rules, rule_free_wrapper);
+        rules = NULL;
+}
 
 /*
  * Apply rule to notification.
@@ -77,6 +100,27 @@ struct rule *rule_new(void)
         r->set_transient = -1;
 
         return r;
+}
+
+void rule_free(struct rule *r)
+{
+        ASSERT_OR_RET(r,);
+
+        g_free(r->name);
+        g_free(r->appname);
+        g_free(r->summary);
+        g_free(r->body);
+        g_free(r->icon);
+        g_free(r->category);
+        g_free(r->stack_tag);
+        g_free(r->desktop_entry);
+        g_free(r->new_icon);
+        g_free(r->fg);
+        g_free(r->bg);
+        g_free(r->fc);
+        g_free(r->set_stack_tag);
+
+        g_free(r);
 }
 
 static inline bool rule_field_matches_string(const char *value, const char *pattern)

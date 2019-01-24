@@ -45,6 +45,19 @@ extern GSList *rules;
  * @returns A new initialised rule.
  */
 struct rule *rule_new(void);
+void rule_free(struct rule *r);
+
+/**
+ * Adds a rule to the rule list
+ *
+ * There's no need to call an initialiser first.
+ */
+void rules_add_rule(struct rule *r);
+
+/**
+ * Remove and free all current rules from the list
+ */
+void rules_teardown(void)
 
 void rule_apply(struct rule *r, struct notification *n);
 void rule_apply_all(struct notification *n);
