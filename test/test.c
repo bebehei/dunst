@@ -20,6 +20,7 @@ SUITE_EXTERN(suite_dunst);
 SUITE_EXTERN(suite_log);
 SUITE_EXTERN(suite_menu);
 SUITE_EXTERN(suite_dbus);
+SUITE_EXTERN(suite_rules);
 
 GREATEST_MAIN_DEFS();
 

@@ -7,9 +7,10 @@
 
 #include "dunst.h"
 #include "utils.h"
-#include "../config.h"
+//#include "../config.h"
 
 GSList *rules = NULL;
+extern struct rule default_rules[0];
 
 void rules_add_rule(struct rule *r)
 {
@@ -22,8 +23,10 @@ static void rule_free_wrapper(gpointer data)
         struct rule *r = (struct rule*)data;
 
         // Only free the rule, if it's not contained in the default ruleset (and therefore a pointer to static)
-        if (r < default_rules || r > default_rules + sizeof(default_rules))
+        if (r < &default_rules[0] || r > &default_rules[G_N_ELEMENTS(default_rules)-1])
                 rule_free(r);
+        else
+                printf("do not free rule: %s\n", r->name);
 }
 
 void rules_teardown(void)
