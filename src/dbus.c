@@ -73,6 +73,8 @@ static const char *introspection_xml =
     "    <interface name=\""DUNST_IFAC"\">"
 
     "        <method name=\"ContextMenuCall\"       />"
+// TODO: add an optional parmater definining the action of notification number X to invoke
+    "        <method name=\"NotificationAction\" />"
     "        <method name=\"NotificationCloseLast\" />"
     "        <method name=\"NotificationCloseAll\"  />"
     "        <method name=\"NotificationShow\"      />"
@@ -152,12 +154,14 @@ void dbus_cb_fdn_methods(GDBusConnection *connection,
 }
 
 DBUS_METHOD(dunst_ContextMenuCall);
+DBUS_METHOD(dunst_NotificationAction);
 DBUS_METHOD(dunst_NotificationCloseAll);
 DBUS_METHOD(dunst_NotificationCloseLast);
 DBUS_METHOD(dunst_NotificationShow);
 DBUS_METHOD(dunst_Ping);
 static struct dbus_method methods_dunst[] = {
         {"ContextMenuCall",        dbus_cb_dunst_ContextMenuCall},
+        {"NotificationAction",     dbus_cb_dunst_NotificationAction},
         {"NotificationCloseAll",   dbus_cb_dunst_NotificationCloseAll},
         {"NotificationCloseLast",  dbus_cb_dunst_NotificationCloseLast},
         {"NotificationShow",       dbus_cb_dunst_NotificationShow},
@@ -196,6 +200,26 @@ static void dbus_cb_dunst_ContextMenuCall(GDBusConnection *connection,
 {
         LOG_D("CMD: Calling context menu");
         context_menu();
+
+        g_dbus_method_invocation_return_value(invocation, NULL);
+        g_dbus_connection_flush(connection, NULL, NULL, NULL);
+}
+
+static void dbus_cb_dunst_NotificationAction(GDBusConnection *connection,
+                                             const gchar *sender,
+                                             GVariant *parameters,
+                                             GDBusMethodInvocation *invocation)
+{
+      //LOG_D("CMD: Calling action for notificaiton %s");
+        LOG_D("CMD: Calling action for notificaiton");
+
+        const GList *list = queues_get_displayed();
+        if (list && list->data) {
+                struct notification *n = list->data;
+                notification_do_action(n);
+                // TODO: do we need to wake up after notification action?
+                wake_up();
+        }
 
         g_dbus_method_invocation_return_value(invocation, NULL);
         g_dbus_connection_flush(connection, NULL, NULL, NULL);
