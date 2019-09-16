@@ -8,9 +8,9 @@ DBUS_IFAC_DUNST="org.dunstproject.cmd0"
 DBUS_IFAC_PROP="org.freedesktop.DBus.Properties"
 DBUS_IFAC_FDN="org.freedesktop.Notifications"
 
-function die(){ printf "%s\n" "${1}" >&2; exit 1; }
+die(){ printf "%s\n" "${1}" >&2; exit 1; }
 
-function show_help() {
+show_help() {
 	cat <<-EOH
 	Usage: dunstctl <command> [parameters]"
 	Commands:
@@ -25,15 +25,15 @@ function show_help() {
 	EOH
 }
 
-function method_call() {
-	dbus-send --print-reply=literal --dest="${DBUS_NAME}" "${DBUS_PATH}" $*
+method_call() {
+	dbus-send --print-reply=literal --dest="${DBUS_NAME}" "${DBUS_PATH}" "$*"
 }
 
-function property_get() {
+property_get() {
 	dbus-send --print-reply=literal --dest="${DBUS_NAME}" "${DBUS_PATH}" "${DBUS_IFAC_PROP}.Get" "string:${DBUS_IFAC_DUNST}" "string:${1}"
 }
 
-function property_set() {
+property_set() {
 	dbus-send --print-reply=literal --dest="${DBUS_NAME}" "${DBUS_PATH}" "${DBUS_IFAC_PROP}.Set" "string:${DBUS_IFAC_DUNST}" "string:${1}" "${2}"
 }
 
@@ -58,12 +58,12 @@ case "${1:-}" in
 		method_call "${DBUS_IFAC_DUNST}.NotificationShow" >/dev/null
 		;;
 	"status")
-		property_get running | ( read _ _ status; printf "%s\n" "${status}"; )
+		property_get running | ( read -r _ _ status; printf "%s\n" "${status}"; )
 		;;
 	"status-set")
 		[ "${2:-}" ] \
 			|| die "No status parameter specified. Please give either 'true' or 'false' as running parameter."
-		[ "${2}" == "true" ] || [ "${2}" == "false" ] \
+		[ "${2}" = "true" ] || [ "${2}" = "false" ] \
 			|| die "Please give either 'true' or 'false' as running parameter."
 		property_set running variant:boolean:"${2}"
 		;;
@@ -76,8 +76,8 @@ case "${1:-}" in
 
 		dbus-send --print-reply=literal --dest="${DBUS_NAME}" "${DBUS_PATH}" "${DBUS_IFAC_FDN}.GetServerInformation" \
 			| (
-					read name vendor version protocol_version
-					[ "${name}" == dunst ]
+					read -r name _ version _
+					[ "${name}" = dunst ]
 					printf "dunst version: %s\n" "${version}"
 				) \
 			|| die "Another notification manager is running. It's not dunst"
