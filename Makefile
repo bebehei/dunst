@@ -211,9 +211,6 @@ install-dunst: dunst doc
 install-dunstctl: dunstctl
 	install -Dm755 dunstctl ${DESTDIR}${BINDIR}/dunstctl
 
-install-doc:
-	install -Dm644 dunstrc ${DESTDIR}${SYSCONFDIR}/dunst/dunstrc
-
 install-service: install-service-dbus
 install-service-dbus: service-dbus
 	install -Dm644 org.knopwob.dunst.service ${DESTDIR}${SERVICEDIR_DBUS}/org.knopwob.dunst.service
@@ -232,7 +229,6 @@ uninstall: uninstall-service uninstall-dunstctl
 	rm -f ${DESTDIR}${MANPREFIX}/man1/dunst.1
 	rm -f ${DESTDIR}${MANPREFIX}/man5/dunst.5
 	rm -f ${DESTDIR}${MANPREFIX}/man1/dunstctl.1
-	rm -rf ${DESTDIR}${SYSCONFDIR}/dunst
 
 uninstall-dunstctl:
 	rm -f ${DESTDIR}${BINDIR}/dunstctl
